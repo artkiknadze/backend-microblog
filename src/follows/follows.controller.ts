@@ -1,17 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { FollowsService } from './follows.service';
-import { CreateFollowDto } from './dto/create-follow.dto';
-import { UpdateFollowDto } from './dto/update-follow.dto';
-import { ApiOperation, ApiProperty } from '@nestjs/swagger';
+import { ApiOperation } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('follows')
 export class FollowsController {
   constructor(private readonly followsService: FollowsService) {}
 
+  @UseGuards(AuthGuard)
   @Post(':userId')
   @ApiOperation({ summary: 'Підписатися на користувача' })
-  create(@Body() createFollowDto: CreateFollowDto) {
-    return this.followsService.create(createFollowDto);
+  create(@Param('userId') userId: string, @Req() req) {
+    return this.followsService.create(+userId, +req.user.sub);
   }
 
   @Get(':userId')
@@ -26,6 +26,7 @@ export class FollowsController {
     return this.followsService.findFollowers(+userId);
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':userId')
   @ApiOperation({ summary: 'Відписатися від користувача' })
   remove(@Param('userId') id: string) {

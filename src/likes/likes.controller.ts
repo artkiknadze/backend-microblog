@@ -1,28 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { LikesService } from './likes.service';
-import { CreateLikeDto } from './dto/create-like.dto';
-import { UpdateLikeDto } from './dto/update-like.dto';
 import { ApiOperation } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('likes')
 export class LikesController {
   constructor(private readonly likesService: LikesService) { }
 
+  @UseGuards(AuthGuard)
   @Post(':postId')
   @ApiOperation({ summary: 'Поставити лайк на пост' })
-  create(@Body() createLikeDto: CreateLikeDto) {
-    return this.likesService.create(createLikeDto);
+  create(@Param('postId') postId: string, @Req() req) {
+    return this.likesService.create(+postId, +req.user.sub);
   }
 
   @Get(':userId')
   @ApiOperation({ summary: 'Отримати лайки, які поставив користувач' })
   findOne(@Param('userId') userId: string) {
-    return this.likesService.findOne(+userId);
+    return this.likesService.findAll(+userId);
   }
 
+  @UseGuards(AuthGuard)
   @Delete(':postId')
   @ApiOperation({ summary: 'Видалити лайк з поста' })
-  remove(@Param('postId') postId: string) {
-    return this.likesService.remove(+postId);
+  remove(@Param('postId') postId: string, @Req() req) {
+    return this.likesService.remove(+postId, +req.user.sub);
   }
 }
