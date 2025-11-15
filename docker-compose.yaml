@@ -23,6 +23,8 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: microblog
+      JWT_SECRET: microblog_jwt_secret
+      ADMIN_TOKEN: super_secret_admin_token
     depends_on:
       - db
     volumes:

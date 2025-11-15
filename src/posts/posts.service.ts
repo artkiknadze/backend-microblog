@@ -1,30 +1,83 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { Repository } from 'typeorm';
+import { Post } from './entities/post.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class PostsService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
+  constructor(@InjectRepository(Post) private readonly postRepository: Repository<Post>) { }
+
+  async create(createPostDto: CreatePostDto, userId: number) {
+    if (createPostDto.replyToPostId) {
+      const parentPost = await this.postRepository.findOne({ where: { id: createPostDto.replyToPostId } });
+      if (!parentPost) {
+        throw new BadRequestException(`Post with id ${createPostDto.replyToPostId} not found`);
+      }
+    }
+
+    const post = this.postRepository.create({
+      ...createPostDto,
+      user: { id: userId },
+      replyToPost: createPostDto.replyToPostId ? { id: createPostDto.replyToPostId } : undefined,
+    });
+    await this.postRepository.save(post);
+
+    return post;
   }
 
-  findAll() {
-    return `This action returns all posts`;
+  async findByUser(userId: number) {
+    return this.postRepository.find({ where: { user: { id: userId } }, relations: ['user', 'replyToPost'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async findOne(id: number) {
+    const post = await this.postRepository.findOne({ where: { id }, relations: ['user', 'replyToPost'] });
+    if (!post) {
+      throw new BadRequestException(`Post with id ${id} not found`);
+    }
+    return post;
   }
 
-  findByUser(userId: number) {
-    return `This action returns posts for user #${userId}`;
+  async update(id: number, userId: number, updatePostDto: UpdatePostDto) {
+    const post = await this.postRepository.findOne({ where: { id, user: { id: userId } } });
+    if (!post) {
+      throw new BadRequestException(`Post not found`);
+    }
+
+    post.body = updatePostDto.body ?? post.body;
+    await this.postRepository.save(post);
+
+    return post;
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async remove(id: number, userId: number) {
+    const post = await this.postRepository.findOne({ where: { id, user: { id: userId } } });
+    if (!post) {
+      throw new BadRequestException(`Post not found`);
+    }
+
+    await this.postRepository.remove(post);
+    return { message: `Post with id ${id} has been removed` };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
-  }
+  // findAll() {
+  //   return `This action returns all posts`;
+  // }
+
+  // findOne(id: number) {
+  //   return `This action returns a #${id} post`;
+  // }
+
+  // findByUser(userId: number) {
+  //   return `This action returns posts for user #${userId}`;
+  // }
+
+  // update(id: number, updatePostDto: UpdatePostDto) {
+  //   return `This action updates a #${id} post`;
+  // }
+
+  // remove(id: number) {
+  //   return `This action removes a #${id} post`;
+  // }
 }

@@ -4,6 +4,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
+
+const saltOrRounds = 10;
 
 @Injectable()
 export class UsersService {
@@ -17,8 +20,11 @@ export class UsersService {
       return new BadRequestException('Email is already taken');
     }
 
+    createUserDto.password = await bcrypt.hash(createUserDto.password, saltOrRounds);
+
     const user = this.userRepository.create(createUserDto);
     await this.userRepository.save(user);
+
     return { id: user.id, username: user.username, email: user.email };
   }
 
@@ -35,7 +41,15 @@ export class UsersService {
   async findOne(id: number) {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
-      return new BadRequestException(`User with id ${id} not found`);
+      throw new BadRequestException(`User with id ${id} not found`);
+    }
+    return user;
+  }
+
+  async findByEmail(email: string, selectPassword = false) {
+    const user = await this.userRepository.findOne({ where: { email }, select: selectPassword ? ['id', 'username', 'email', 'password'] : ['id', 'username', 'email'] });
+    if (!user) {
+      throw new BadRequestException(`User with email ${email} not found`);
     }
     return user;
   }
