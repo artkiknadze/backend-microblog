@@ -8,9 +8,6 @@ export class LikesService {
   constructor(@InjectRepository(Like) private readonly likeRepository: Repository<Like>) { }
 
   async create(postId: number, userId: number) {
-    if (await this.likeRepository.findOne({ where: { post: { id: postId }, user: { id: userId } } })) {
-      throw new BadRequestException('Post already liked');
-    }
     const like = this.likeRepository.create({ post: { id: postId }, user: { id: userId } });
     await this.likeRepository.save(like);
     return { message: 'Like added' };

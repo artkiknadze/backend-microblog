@@ -17,6 +17,10 @@ export class PostsService {
       }
     }
 
+    if (!createPostDto.body) {
+      throw new BadRequestException('Post body cannot be empty');
+    }
+
     const post = this.postRepository.create({
       ...createPostDto,
       user: { id: userId },
@@ -60,24 +64,4 @@ export class PostsService {
     await this.postRepository.remove(post);
     return { message: `Post with id ${id} has been removed` };
   }
-
-  // findAll() {
-  //   return `This action returns all posts`;
-  // }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} post`;
-  // }
-
-  // findByUser(userId: number) {
-  //   return `This action returns posts for user #${userId}`;
-  // }
-
-  // update(id: number, updatePostDto: UpdatePostDto) {
-  //   return `This action updates a #${id} post`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} post`;
-  // }
 }

@@ -1,7 +1,7 @@
-import { Follow } from "src/follows/entities/follow.entity";
-import { Like } from "src/likes/entities/like.entity";
-import { Post } from "src/posts/entities/post.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Follow } from "../../follows/entities/follow.entity";
+import { Post } from "../../posts/entities/post.entity";
+import { Like } from "../../likes/entities/like.entity";
 
 @Entity()
 export class User {

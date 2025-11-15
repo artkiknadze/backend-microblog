@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { FollowsService } from './follows.service';
 import { ApiOperation } from '@nestjs/swagger';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('follows')
 export class FollowsController {
@@ -29,7 +29,7 @@ export class FollowsController {
   @UseGuards(AuthGuard)
   @Delete(':userId')
   @ApiOperation({ summary: 'Відписатися від користувача' })
-  remove(@Param('userId') id: string) {
-    return this.followsService.remove(+id);
+  remove(@Param('userId') id: string, @Req() req) {
+    return this.followsService.remove(+id, +req.user.sub);
   }
 }

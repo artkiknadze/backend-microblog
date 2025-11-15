@@ -9,7 +9,8 @@ export class FollowsService {
 
   async create(followedId: number, userId: number) {
     const follow = this.followsRepository.create({ user: { id: userId }, followed: { id: followedId } });
-    return await this.followsRepository.save(follow);
+    await this.followsRepository.save(follow);
+    return follow;
   }
 
   async findFollows(userId: number) {
@@ -28,8 +29,14 @@ export class FollowsService {
     return followers;
   }
 
-  async remove(id: number) {
-    await this.followsRepository.delete({ followed: { id } });
+  async remove(followedId: number, userId: number) {
+    const follow = await this.followsRepository.findOne({
+      where: { followed: { id: followedId }, user: { id: userId } },
+    });
+    if (!follow) {
+      throw new Error('You are not following this user');
+    }
+    await this.followsRepository.delete({ followed: { id: followedId }, user: { id: userId } });
     return { message: 'Unfollowed successfully' };
   }
 }

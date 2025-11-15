@@ -3,8 +3,8 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOperation } from '@nestjs/swagger';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { AdminGuard } from 'src/auth/admin.guard';
+import { AuthGuard } from '../auth/auth.guard';
+import { AdminGuard } from '../auth/admin.guard';
 
 @Controller('users')
 export class UsersController {
