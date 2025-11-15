@@ -1,7 +1,8 @@
 import { User } from "src/users/entities/user.entity";
-import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
+@Index(['user', 'followed'], { unique: true })
 export class Follow {
     @PrimaryGeneratedColumn()
     id: number;

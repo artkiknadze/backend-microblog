@@ -1,8 +1,9 @@
 import { Post } from "src/posts/entities/post.entity";
 import { User } from "src/users/entities/user.entity";
-import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
+@Index(['user', 'post'], { unique: true })
 export class Like {
     @PrimaryGeneratedColumn()
     id: number;
