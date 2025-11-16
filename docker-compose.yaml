@@ -23,13 +23,27 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: microblog
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis_password
       JWT_SECRET: microblog_jwt_secret
       ADMIN_TOKEN: super_secret_admin_token
     depends_on:
       - db
+      - redis
     volumes:
       - ./:/app
     command: npm run start:dev
+  
+  redis:
+    image: redis:8.2-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redis_password
+    volumes:
+      - cache:/data
 
 volumes:
   postgres_data:
+  cache:
+    driver: local
