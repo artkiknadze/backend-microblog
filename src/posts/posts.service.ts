@@ -34,7 +34,11 @@ export class PostsService {
   }
 
   async findByUser(userId: number) {
-    return this.postRepository.find({ where: { user: { id: userId } }, relations: ['user', 'replyToPost'] });
+    const posts = await this.postRepository.find({ where: { user: { id: userId } }, relations: ['user', 'replyToPost'] });
+    if (posts.length === 0) {
+      throw new BadRequestException(`Post with userId ${userId} not found`);
+    }
+    return posts;
   }
 
   async findOne(id: number) {
