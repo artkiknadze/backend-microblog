@@ -8,14 +8,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class PostsService {
   constructor(
-    @InjectRepository(Post) private readonly postRepository: Repository<Post>
-  ) { }
+    @InjectRepository(Post) private readonly postRepository: Repository<Post>,
+  ) {}
 
   async create(createPostDto: CreatePostDto, userId: number) {
     if (createPostDto.replyToPostId) {
-      const parentPost = await this.postRepository.findOne({ where: { id: createPostDto.replyToPostId } });
+      const parentPost = await this.postRepository.findOne({
+        where: { id: createPostDto.replyToPostId },
+      });
       if (!parentPost) {
-        throw new BadRequestException(`Post with id ${createPostDto.replyToPostId} not found`);
+        throw new BadRequestException(
+          `Post with id ${createPostDto.replyToPostId} not found`,
+        );
       }
     }
 
@@ -26,7 +30,9 @@ export class PostsService {
     const post = this.postRepository.create({
       ...createPostDto,
       user: { id: userId },
-      replyToPost: createPostDto.replyToPostId ? { id: createPostDto.replyToPostId } : undefined,
+      replyToPost: createPostDto.replyToPostId
+        ? { id: createPostDto.replyToPostId }
+        : undefined,
     });
     await this.postRepository.save(post);
 
@@ -34,7 +40,10 @@ export class PostsService {
   }
 
   async findByUser(userId: number) {
-    const posts = await this.postRepository.find({ where: { user: { id: userId } }, relations: ['user', 'replyToPost'] });
+    const posts = await this.postRepository.find({
+      where: { user: { id: userId } },
+      relations: ['user', 'replyToPost'],
+    });
     if (posts.length === 0) {
       throw new BadRequestException(`Post with userId ${userId} not found`);
     }
@@ -42,7 +51,10 @@ export class PostsService {
   }
 
   async findOne(id: number) {
-    const post = await this.postRepository.findOne({ where: { id }, relations: ['user', 'replyToPost'] });
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['user', 'replyToPost'],
+    });
     if (!post) {
       throw new BadRequestException(`Post with id ${id} not found`);
     }
@@ -50,7 +62,9 @@ export class PostsService {
   }
 
   async update(id: number, userId: number, updatePostDto: UpdatePostDto) {
-    const post = await this.postRepository.findOne({ where: { id, user: { id: userId } } });
+    const post = await this.postRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
     if (!post) {
       throw new BadRequestException(`Post not found`);
     }
@@ -62,7 +76,9 @@ export class PostsService {
   }
 
   async remove(id: number, userId: number) {
-    const post = await this.postRepository.findOne({ where: { id, user: { id: userId } } });
+    const post = await this.postRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
     if (!post) {
       throw new BadRequestException(`Post not found`);
     }

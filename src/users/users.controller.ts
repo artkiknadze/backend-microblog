@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,7 +18,7 @@ import { AdminGuard } from '../auth/admin.guard';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   @ApiOperation({ summary: 'Створити користувача' })
@@ -19,7 +29,7 @@ export class UsersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Отримати користувача' })
-  @ApiParam({ name: "id", description: "ID користувача" })
+  @ApiParam({ name: 'id', description: 'ID користувача' })
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
@@ -27,7 +37,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @Patch()
   @ApiOperation({ summary: 'Оновити дані користувача' })
-  @ApiHeader({ name: "Authorization" })
+  @ApiHeader({ name: 'Authorization' })
   @ApiBody({ type: UpdateUserDto })
   update(@Body() updateUserDto: UpdateUserDto, @Req() req) {
     return this.usersService.update(req.user.sub, updateUserDto);
@@ -36,8 +46,8 @@ export class UsersController {
   @UseGuards(AdminGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Видалити користувача' })
-  @ApiHeader({ name: "Authorization (admin-only)" })
-  @ApiParam({ name: "id", description: "ID користувача" })
+  @ApiHeader({ name: 'Authorization (admin-only)' })
+  @ApiParam({ name: 'id', description: 'ID користувача' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }

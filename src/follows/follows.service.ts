@@ -5,10 +5,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class FollowsService {
-  constructor(@InjectRepository(Follow) private followsRepository: Repository<Follow>) { }
+  constructor(
+    @InjectRepository(Follow) private followsRepository: Repository<Follow>,
+  ) {}
 
   async create(followedId: number, userId: number) {
-    const follow = this.followsRepository.create({ user: { id: userId }, followed: { id: followedId } });
+    const follow = this.followsRepository.create({
+      user: { id: userId },
+      followed: { id: followedId },
+    });
     await this.followsRepository.save(follow);
     return follow;
   }
@@ -36,7 +41,10 @@ export class FollowsService {
     if (!follow) {
       throw new Error('You are not following this user');
     }
-    await this.followsRepository.delete({ followed: { id: followedId }, user: { id: userId } });
+    await this.followsRepository.delete({
+      followed: { id: followedId },
+      user: { id: userId },
+    });
     return { message: 'Unfollowed successfully' };
   }
 }

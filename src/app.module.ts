@@ -14,12 +14,19 @@ import KeyvRedis, { Keyv } from '@keyv/redis';
 import { EmailModule } from './email/email.module';
 
 @Module({
-  imports: [FollowsModule, UsersModule, PostsModule, LikesModule, AuthModule,
+  imports: [
+    FollowsModule,
+    UsersModule,
+    PostsModule,
+    LikesModule,
+    AuthModule,
     ThrottlerModule.forRoot({
-      throttlers: [{
-        ttl: 60000,
-        limit: 60,
-      }]
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 60,
+        },
+      ],
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -33,17 +40,29 @@ import { EmailModule } from './email/email.module';
     }),
     CacheModule.registerAsync({
       isGlobal: true,
-      useFactory: async () => {
-        const store = new Keyv({ store: new KeyvRedis('redis://default:' + process.env.REDIS_PASSWORD + '@' + process.env.REDIS_HOST + ':' + process.env.REDIS_PORT) });
+      useFactory: () => {
+        const store = new Keyv({
+          store: new KeyvRedis(
+            'redis://default:' +
+              process.env.REDIS_PASSWORD +
+              '@' +
+              process.env.REDIS_HOST +
+              ':' +
+              process.env.REDIS_PORT,
+          ),
+        });
         return { stores: [store], ttl: 10000 };
       },
     }),
-    EmailModule
+    EmailModule,
   ],
   controllers: [AppController],
-  providers: [AppService, {
-    provide: APP_GUARD,
-    useClass: ThrottlerGuard
-  }],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -10,28 +10,30 @@ describe('PostsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PostsController],
-      providers: [PostsService,
+      providers: [
+        PostsService,
         {
-          provide: 'PostRepository', useValue: {
-            findOne: jest.fn(
-              ({ where: { id } }) => {
-                if (id === 1) {
-                  return { id: 1, body: 'Test post', user: { id: 1 } };
-                }
-                return null;
+          provide: 'PostRepository',
+          useValue: {
+            findOne: jest.fn(({ where: { id } }) => {
+              if (id === 1) {
+                return { id: 1, body: 'Test post', user: { id: 1 } };
               }
-            ),
-            create: jest.fn(
-              string => ({ id: Date.now(), ...string })
-            ),
+              return null;
+            }),
+            create: jest.fn((string) => ({ id: Date.now(), ...string })),
             save: jest.fn(),
             find: jest.fn(),
             remove: jest.fn(),
           },
-        }],
-    }).overrideGuard(AuthGuard).useValue({
-      canActivate: jest.fn(() => true),
-    }).compile();
+        },
+      ],
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<PostsController>(PostsController);
   });
@@ -50,7 +52,7 @@ describe('PostsController', () => {
     expect((await post).user.id).toBe(1);
   });
 
-  it('/post (POST) shouldn\'t create a post with empty body', async () => {
+  it("/post (POST) shouldn't create a post with empty body", async () => {
     const createPostDto = { body: '' };
     const userId = 1;
     const post = controller.create(createPostDto, { user: { sub: userId } });
@@ -64,7 +66,7 @@ describe('PostsController', () => {
     expect(await post).toHaveProperty('id', 1);
   });
 
-  it('/post/:id (GET) should throw error if can\'t find post by id', async () => {
+  it("/post/:id (GET) should throw error if can't find post by id", async () => {
     const post = controller.findOne('-1');
 
     expect(post).rejects.toThrow(BadRequestException);
@@ -73,16 +75,20 @@ describe('PostsController', () => {
   it('/post (PATCH) should update a post', async () => {
     const createPostDto = { body: 'Test post upd' };
     const userId = 1;
-    const post = controller.update('1', createPostDto, { user: { sub: userId } });
+    const post = controller.update('1', createPostDto, {
+      user: { sub: userId },
+    });
 
-    expect((await post)).toHaveProperty('body', 'Test post upd');
+    expect(await post).toHaveProperty('body', 'Test post upd');
   });
 
   it('/post/:id (DELETE) should delete a post', async () => {
     const userId = 1;
     const post = controller.remove('1', { user: { sub: userId } });
 
-    expect((await post)).toHaveProperty('message', 'Post with id 1 has been removed');
+    expect(await post).toHaveProperty(
+      'message',
+      'Post with id 1 has been removed',
+    );
   });
-
 });

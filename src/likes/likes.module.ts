@@ -5,10 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Like } from './entities/like.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Like]),
-  ],
+  imports: [TypeOrmModule.forFeature([Like])],
   controllers: [LikesController],
   providers: [LikesService],
 })
-export class LikesModule { }
+export class LikesModule {}

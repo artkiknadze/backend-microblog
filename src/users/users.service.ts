@@ -11,7 +11,9 @@ const saltOrRounds = 10;
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     if (!(await this.isUsernameUnique(createUserDto.username))) {
@@ -21,7 +23,10 @@ export class UsersService {
       return new BadRequestException('Email is already taken');
     }
 
-    createUserDto.password = await bcrypt.hash(createUserDto.password, saltOrRounds);
+    createUserDto.password = await bcrypt.hash(
+      createUserDto.password,
+      saltOrRounds,
+    );
 
     const user = this.userRepository.create(createUserDto);
     await this.userRepository.save(user);
@@ -40,7 +45,10 @@ export class UsersService {
   }
 
   async findOne(id: number) {
-    const user = await this.userRepository.findOne({ where: { id }, relations: ['posts'] });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['posts'],
+    });
     if (!user) {
       throw new BadRequestException(`User with id ${id} not found`);
     }
@@ -48,33 +56,45 @@ export class UsersService {
   }
 
   async findAll() {
-    return await this.userRepository.find({ select: { id: true, displayName: true, email: true } });
+    return await this.userRepository.find({
+      select: { id: true, displayName: true, email: true },
+    });
   }
 
   async makeFeed(userId: number) {
     const posts: Post[] = [];
     const feed = await this.userRepository.findOne({
       where: {
-        id: userId
+        id: userId,
       },
       relations: {
         followed: {
           followed: {
             posts: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
-    feed?.followed.forEach(author => {
-      const authorPosts = author.followed?.posts?.filter(post => new Date(post.createdAt) >= new Date(Date.now() - 24 * 60 * 60 * 1000)) ?? [];
-      authorPosts.map((post, i) => authorPosts[i].user = author.followed);
+    feed?.followed.forEach((author) => {
+      const authorPosts =
+        author.followed?.posts?.filter(
+          (post) =>
+            new Date(post.createdAt) >=
+            new Date(Date.now() - 24 * 60 * 60 * 1000),
+        ) ?? [];
+      authorPosts.map((post, i) => (authorPosts[i].user = author.followed));
       posts.push(...authorPosts);
-    })
+    });
     return posts;
   }
 
   async findByEmail(email: string, selectPassword = false) {
-    const user = await this.userRepository.findOne({ where: { email }, select: selectPassword ? ['id', 'username', 'email', 'password'] : ['id', 'username', 'email'] });
+    const user = await this.userRepository.findOne({
+      where: { email },
+      select: selectPassword
+        ? ['id', 'username', 'email', 'password']
+        : ['id', 'username', 'email'],
+    });
     if (!user) {
       throw new BadRequestException(`User with email ${email} not found`);
     }
@@ -85,14 +105,20 @@ export class UsersService {
     if (!updateUserDto) {
       return new BadRequestException('Update data is empty');
     }
-    if (updateUserDto.username && !(await this.isUsernameUnique(updateUserDto.username))) {
+    if (
+      updateUserDto.username &&
+      !(await this.isUsernameUnique(updateUserDto.username))
+    ) {
       return new BadRequestException('Username is already taken');
     }
-    if (updateUserDto.email && !(await this.isEmailUnique(updateUserDto.email))) {
+    if (
+      updateUserDto.email &&
+      !(await this.isEmailUnique(updateUserDto.email))
+    ) {
       return new BadRequestException('Email is already taken');
     }
 
-    const result = await this.userRepository.update(id, updateUserDto);
+    await this.userRepository.update(id, updateUserDto);
     return updateUserDto;
   }
 

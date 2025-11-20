@@ -5,20 +5,30 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class LikesService {
-  constructor(@InjectRepository(Like) private readonly likeRepository: Repository<Like>) { }
+  constructor(
+    @InjectRepository(Like) private readonly likeRepository: Repository<Like>,
+  ) {}
 
   async create(postId: number, userId: number) {
-    const like = this.likeRepository.create({ post: { id: postId }, user: { id: userId } });
+    const like = this.likeRepository.create({
+      post: { id: postId },
+      user: { id: userId },
+    });
     await this.likeRepository.save(like);
     return { message: 'Like added' };
   }
 
   async findAll(userId: number) {
-    return await this.likeRepository.find({ where: { user: { id: userId } }, relations: ['post'] });
+    return await this.likeRepository.find({
+      where: { user: { id: userId } },
+      relations: ['post'],
+    });
   }
 
   async remove(postId: number, userId: number) {
-    const like = await this.likeRepository.findOne({ where: { post: { id: postId }, user: { id: userId } } });
+    const like = await this.likeRepository.findOne({
+      where: { post: { id: postId }, user: { id: userId } },
+    });
     if (!like) {
       throw new BadRequestException('Like not found');
     }

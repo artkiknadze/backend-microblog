@@ -6,17 +6,19 @@ describe('FollowsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FollowsService, {
-          provide: 'FollowRepository', useValue: {
+      providers: [
+        FollowsService,
+        {
+          provide: 'FollowRepository',
+          useValue: {
             findOne: jest.fn(),
-            create: jest.fn(
-              string => ({ id: Date.now(), ...string })
-            ),
+            create: jest.fn((string) => ({ id: Date.now(), ...string })),
             save: jest.fn(),
             find: jest.fn(),
             delete: jest.fn(),
-          }
-        },],
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<FollowsService>(FollowsService);
@@ -39,8 +41,14 @@ describe('FollowsService', () => {
   it('should unfollow a user', async () => {
     const userId = 1;
     const followedId = 2;
-    const followMock = { id: 1, user: { id: userId }, followed: { id: followedId } };
-    jest.spyOn(service['followsRepository'], 'findOne').mockResolvedValueOnce(followMock as any);
+    const followMock = {
+      id: 1,
+      user: { id: userId },
+      followed: { id: followedId },
+    };
+    jest
+      .spyOn(service['followsRepository'], 'findOne')
+      .mockResolvedValueOnce(followMock as any);
     const unfollow = await service.remove(followedId, userId);
 
     expect(unfollow).toHaveProperty('message', 'Unfollowed successfully');
