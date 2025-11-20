@@ -1,50 +1,52 @@
-image: node:latest
-services:
-  - redis:latest
-  - postgres:latest
-cache:
-  paths:
-    - node_modules/
+name: CI/CD
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
 jobs:
   test:
     name: Run tests
-    runs-on: node:20
+    runs-on: ubuntu-latest
+    container: node:20
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Install dependependencies
-        run: npm i
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run linter
         run: npm run lint
 
       - name: Run tests
         run: npm run test
+
+  deploy:
+    name: Deploy to Production
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     
-    deploy:
-      name: Deploy to Production
-      needs: test
-      runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-      steps: 
-        - name: Checkout code
-          uses: actions/checkout@v4
-        
-        - name: Install dependependencies
-          run: npm i
+      - name: Install dependencies
+        run: npm ci
 
-        - name: Build 
-          run: npm run build
+      - name: Build 
+        run: npm run build
 
-        - name: Deploy SSH
-          uses: easingthemes/ssh-deploy@main
-          with:
-            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-            SOURCE: "dist/"
-            REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-            REMOTE_USER: ${{ secrets.REMOTE_USER }}
-            TARGET: ${{ secrets.REMOTE_TARGET }}
-            EXCLUDE: "/dist/, /node_modules/"
-
+      - name: Deploy SSH
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: ${{ secrets.REMOTE_TARGET }}
+          EXCLUDE: "/dist/,/node_modules/"
