@@ -13,7 +13,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   app:
-    image: node:18
+    image: node:20
     working_dir: /app
     ports:
       - "3000:3000"
@@ -28,13 +28,19 @@ services:
       REDIS_PASSWORD: redis_password
       JWT_SECRET: microblog_jwt_secret
       ADMIN_TOKEN: super_secret_admin_token
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+    env_file:
+      - .env
     depends_on:
       - db
       - redis
     volumes:
       - ./:/app
     command: npm run start:dev
-  
+
   redis:
     image: redis:8.2-alpine
     ports:

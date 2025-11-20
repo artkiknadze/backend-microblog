@@ -26,6 +26,6 @@ export class User {
     @OneToMany(() => Post, post => post.user)
     posts: Post[];
 
-    @OneToMany(() => Follow, follow => follow.followed)
+    @OneToMany(() => Follow, follow => follow.user)
     followed: Follow[];
 }

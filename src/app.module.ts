@@ -11,6 +11,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { CacheModule } from '@nestjs/cache-manager';
 import KeyvRedis, { Keyv } from '@keyv/redis';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [FollowsModule, UsersModule, PostsModule, LikesModule, AuthModule,
@@ -36,7 +37,8 @@ import KeyvRedis, { Keyv } from '@keyv/redis';
         const store = new Keyv({ store: new KeyvRedis('redis://default:' + process.env.REDIS_PASSWORD + '@' + process.env.REDIS_HOST + ':' + process.env.REDIS_PORT) });
         return { stores: [store], ttl: 10000 };
       },
-    })
+    }),
+    EmailModule
   ],
   controllers: [AppController],
   providers: [AppService, {

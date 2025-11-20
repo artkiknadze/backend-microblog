@@ -5,12 +5,13 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { Post } from '../posts/entities/post.entity';
 
 const saltOrRounds = 10;
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) { }
+  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
 
   async create(createUserDto: CreateUserDto) {
     if (!(await this.isUsernameUnique(createUserDto.username))) {
@@ -44,6 +45,32 @@ export class UsersService {
       throw new BadRequestException(`User with id ${id} not found`);
     }
     return user;
+  }
+
+  async findAll() {
+    return await this.userRepository.find({ select: { id: true, displayName: true, email: true } });
+  }
+
+  async makeFeed(userId: number) {
+    const posts: Post[] = [];
+    const feed = await this.userRepository.findOne({
+      where: {
+        id: userId
+      },
+      relations: {
+        followed: {
+          followed: {
+            posts: true,
+          }
+        }
+      }
+    });
+    feed?.followed.forEach(author => {
+      const authorPosts = author.followed?.posts?.filter(post => new Date(post.createdAt) >= new Date(Date.now() - 24 * 60 * 60 * 1000)) ?? [];
+      authorPosts.map((post, i) => authorPosts[i].user = author.followed);
+      posts.push(...authorPosts);
+    })
+    return posts;
   }
 
   async findByEmail(email: string, selectPassword = false) {

@@ -7,7 +7,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class PostsService {
-  constructor(@InjectRepository(Post) private readonly postRepository: Repository<Post>) { }
+  constructor(
+    @InjectRepository(Post) private readonly postRepository: Repository<Post>
+  ) { }
 
   async create(createPostDto: CreatePostDto, userId: number) {
     if (createPostDto.replyToPostId) {
