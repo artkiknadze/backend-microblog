@@ -3,6 +3,7 @@ import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { BadRequestException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('PostsController', () => {
   let controller: PostsController;
@@ -27,6 +28,15 @@ describe('PostsController', () => {
             remove: jest.fn(),
           },
         },
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+            reset: jest.fn(),
+          },
+        }
       ],
     })
       .overrideGuard(AuthGuard)
